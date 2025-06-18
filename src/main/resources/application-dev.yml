@@ -1,0 +1,7 @@
+spring:
+  liquibase:
+    contexts: dev
+
+application:
+  auth0:
+      redirect-url: http://localhost:4200
