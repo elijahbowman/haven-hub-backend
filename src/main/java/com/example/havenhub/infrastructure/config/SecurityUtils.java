@@ -20,8 +20,6 @@ public class SecurityUtils {
     public static final String CLAIMS_NAMESPACE = "https://haven-hub/roles";
 
     public static User mapOauth2AttributesToUser(Map<String, Object> attributes) {
-        System.out.println("Token attributes: " + attributes);
-
         User user = new User();
         String sub = String.valueOf(attributes.get("sub"));
 
