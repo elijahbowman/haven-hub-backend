@@ -2,7 +2,7 @@ logging:
   level:
     ROOT: info
     org.hibernate.SQL: INFO
-    com.example.havenhubback: INFO
+    com.example.havenhub: INFO
 
 spring:
   datasource:
