@@ -2,7 +2,8 @@
 
 Spring Boot backend of HavenHub
 
-[Angular Frontend](https://github.com/elijahbowman/haven-hub-frontend)
+<!-- TODO: replace TODO-USERNAME and TODO-FRONTEND-REPO with the real frontend repo URL -->
+[Angular Frontend](https://github.com/TODO-USERNAME/TODO-FRONTEND-REPO)
 
 ### Key Features
 - Booking management for travelers
@@ -25,7 +26,8 @@ Spring Boot backend of HavenHub
 - IDE ([VSCode](https://code.visualstudio.com/download), [IntelliJ](https://www.jetbrains.com/idea/download/))
 
 ### Clone the repository
-``git clone https://github.com/elijahbowman/haven-hub-backend``
+<!-- TODO: replace TODO-USERNAME and TODO-BACKEND-REPO with the real backend repo URL -->
+``git clone https://github.com/TODO-USERNAME/TODO-BACKEND-REPO``
 
 ### Launch
 #### Maven
