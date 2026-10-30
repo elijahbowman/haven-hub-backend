@@ -4,7 +4,9 @@ import com.example.havenhub.listing.domain.BookingCategory;
 import com.example.havenhub.listing.domain.Listing;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
@@ -32,6 +34,14 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
     Page<Listing> findAllWithCoverOnly(Pageable pageable);
 
     Optional<Listing> findByPublicId(UUID publicId);
+
+    /**
+     * Loads a listing and locks its row (SELECT ... FOR UPDATE) until the current
+     * transaction ends.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT listing FROM Listing listing WHERE listing.publicId = :publicId")
+    Optional<Listing> findByPublicIdForUpdate(UUID publicId);
 
     List<Listing> findAllByPublicIdIn(List<UUID> allListingPublicIDs);
 

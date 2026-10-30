@@ -12,6 +12,7 @@ import com.example.havenhub.user.application.Auth0Service;
 import com.example.havenhub.user.application.UserService;
 import com.example.havenhub.user.application.dto.ReadUserDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -70,8 +71,14 @@ public class LandlordService {
         }
     }
 
-    public Optional<ListingCreateBookingDTO> getByListingPublicId(UUID publicId) {
-        return listingRepository.findByPublicId(publicId).map(listingMapper::mapListingToListingCreateBookingDTO);
+    /**
+     * Loads a listing for a new booking and locks its row until the caller's
+     * transaction ends, so concurrent bookings of the same listing run one at a
+     * time. Must be called inside the booking transaction.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<ListingCreateBookingDTO> lockForBooking(UUID publicId) {
+        return listingRepository.findByPublicIdForUpdate(publicId).map(listingMapper::mapListingToListingCreateBookingDTO);
     }
 
     public List<DisplayCardListingDTO> getCardDisplayByListingPublicId(List<UUID> allListingPublicIDs) {

@@ -10,6 +10,7 @@ import com.example.havenhub.sharedkernel.service.State;
 import com.example.havenhub.sharedkernel.service.StatusNotification;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -77,6 +78,15 @@ public class BookingResource {
     public ResponseEntity<ProblemDetail> handleBookingConflict(BookingConflictException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage()));
+    }
+
+    // A lock timeout or deadlock between concurrent requests. Bookings lock the
+    // listing row, so this shouldn't happen; if it does, the client can retry.
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<ProblemDetail> handleLockFailure(PessimisticLockingFailureException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                        "These dates are being booked by someone else, please try again"));
     }
 
     // Two requests that pass the availability check at the same time: the database

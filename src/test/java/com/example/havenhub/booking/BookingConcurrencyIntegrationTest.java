@@ -25,10 +25,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The application checks availability before inserting, but two requests can pass
- * that check at the same time. This test fires many simultaneous bookings for the
- * same nights and verifies that the booking_no_overlap constraint lets exactly one
- * through.
+ * Fires many simultaneous bookings for the same nights. Exactly one must succeed
+ * and every other request must be rejected as a conflict: no double booking, and
+ * no deadlock or other error surfacing to the caller.
  */
 class BookingConcurrencyIntegrationTest extends AbstractIntegrationTest {
 
@@ -59,7 +58,7 @@ class BookingConcurrencyIntegrationTest extends AbstractIntegrationTest {
                         startGate.await();
                         return bookingService.create(request).getStatus() == StatusNotification.OK;
                     } catch (BookingConflictException | DataIntegrityViolationException rejected) {
-                        // Rejected either by the availability check or by the database constraint.
+                        // Rejected by the availability check (or, as a safety net, the constraint).
                         return false;
                     } finally {
                         SecurityContextHolder.clearContext();
@@ -71,7 +70,7 @@ class BookingConcurrencyIntegrationTest extends AbstractIntegrationTest {
 
             long successes = 0;
             for (Future<Boolean> outcome : outcomes) {
-                // Any other exception (e.g. a failed commit) fails the test here.
+                // Any other exception (e.g. a deadlock) fails the test here.
                 if (outcome.get(60, SECONDS)) {
                     successes++;
                 }

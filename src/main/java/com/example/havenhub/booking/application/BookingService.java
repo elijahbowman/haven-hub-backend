@@ -47,12 +47,16 @@ public class BookingService {
     /**
      * Books the nights [startDate, endDate) of a listing for the current user.
      * Invalid requests return an error state; a clash with another booking throws
-     * {@link BookingConflictException}, or DataIntegrityViolationException when two
-     * requests race and the database's booking_no_overlap constraint rejects one.
+     * {@link BookingConflictException}.
+     * <p>
+     * The listing row is locked first, so concurrent bookings of the same listing
+     * run one at a time and the availability check sees the previous booking.
+     * Without the lock, concurrent inserts can deadlock while checking the
+     * booking_no_overlap constraint, which remains as a safety net.
      */
     @Transactional
     public State<Void, String> create(NewBookingDTO newBookingDTO) {
-        Optional<ListingCreateBookingDTO> listingOpt = landlordService.getByListingPublicId(newBookingDTO.listingPublicId());
+        Optional<ListingCreateBookingDTO> listingOpt = landlordService.lockForBooking(newBookingDTO.listingPublicId());
 
         if (listingOpt.isEmpty()) {
             return State.<Void, String>builder().forError("Listing not found");
