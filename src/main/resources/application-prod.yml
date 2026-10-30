@@ -16,3 +16,8 @@ spring:
   liquibase:
     contexts: prod
     default-schema: haven_hub
+
+application:
+  auth0:
+    # Where users land after login. "/" works when the SPA and API share one origin.
+    redirect-url: ${AUTH0_REDIRECT_URL:/}

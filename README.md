@@ -30,6 +30,9 @@ Spring Boot backend of HavenHub
 ``git clone https://github.com/TODO-USERNAME/TODO-BACKEND-REPO``
 
 ### Launch
+The `dev` profile is used by default. In production, set `SPRING_PROFILES_ACTIVE=prod`
+along with the `POSTGRES_*` variables (and optionally `AUTH0_REDIRECT_URL`, default `/`).
+
 #### Maven
 ``./mvnw spring-boot:run  -Dspring-boot.run.arguments="--AUTH0_CLIENT_ID=<client-id> --AUTH0_CLIENT_SECRET=<client-secret>"``
 

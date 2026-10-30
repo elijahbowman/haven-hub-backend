@@ -6,7 +6,8 @@ logging:
 
 spring:
   profiles:
-    active: dev
+    # Used only when no profile is set; production sets SPRING_PROFILES_ACTIVE=prod.
+    default: dev
   application:
     name: haven-hub-back
   datasource:
