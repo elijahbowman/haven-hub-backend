@@ -1,5 +1,8 @@
 # HavenHub backend
 
+<!-- TODO: replace TODO-USERNAME and TODO-BACKEND-REPO so the badge points at this repo -->
+[![CI](https://github.com/TODO-USERNAME/TODO-BACKEND-REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/TODO-USERNAME/TODO-BACKEND-REPO/actions/workflows/ci.yml)
+
 Spring Boot backend of HavenHub
 
 <!-- TODO: replace TODO-USERNAME and TODO-FRONTEND-REPO with the real frontend repo URL -->
