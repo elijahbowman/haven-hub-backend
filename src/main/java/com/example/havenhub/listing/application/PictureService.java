@@ -8,7 +8,6 @@ import com.example.havenhub.listing.repository.ListingPictureRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class PictureService {
@@ -22,18 +21,19 @@ public class PictureService {
         this.listingPictureMapper = listingPictureMapper;
     }
 
+    /**
+     * Saves pictures in the given order; the first one becomes the cover.
+     */
     public List<PictureDTO> saveAll(List<PictureDTO> pictures, Listing listing) {
-        Set<ListingPicture> listingPictures = listingPictureMapper.pictureDTOsToListingPictures(pictures);
+        List<ListingPicture> listingPictures = listingPictureMapper.pictureDTOsToListingPictures(pictures);
 
-        boolean isFirst = true;
-
-        for (ListingPicture listingPicture : listingPictures) {
-            listingPicture.setCover(isFirst);
+        for (int i = 0; i < listingPictures.size(); i++) {
+            ListingPicture listingPicture = listingPictures.get(i);
+            listingPicture.setCover(i == 0);
             listingPicture.setListing(listing);
-            isFirst = false;
         }
 
         listingPictureRepository.saveAll(listingPictures);
-        return listingPictureMapper.listingPictureToPictureDTO(listingPictures.stream().toList());
+        return listingPictureMapper.listingPictureToPictureDTO(listingPictures);
     }
 }

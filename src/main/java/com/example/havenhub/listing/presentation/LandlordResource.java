@@ -24,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -55,9 +57,13 @@ public class LandlordResource {
             MultipartHttpServletRequest request,
             @RequestPart(name = "dto") String saveListingDTOString
     ) throws IOException {
+        // Parts are named picture-0, picture-1, ...; sort by that index so the
+        // upload order (and therefore the cover) doesn't depend on map ordering.
         List<PictureDTO> pictures = request.getFileMap()
-                .values()
+                .entrySet()
                 .stream()
+                .sorted(Comparator.comparingInt(entry -> pictureIndex(entry.getKey())))
+                .map(Map.Entry::getValue)
                 .map(mapMultipartFileToPictureDTO())
                 .toList();
 
@@ -77,6 +83,14 @@ public class LandlordResource {
         }
     }
 
+
+    private static int pictureIndex(String partName) {
+        try {
+            return Integer.parseInt(partName.substring(partName.lastIndexOf('-') + 1));
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
+        }
+    }
 
     private static Function<MultipartFile, PictureDTO> mapMultipartFileToPictureDTO() {
         return multipartFile -> {
