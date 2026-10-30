@@ -36,6 +36,11 @@ along with the `POSTGRES_*` variables (and optionally `AUTH0_REDIRECT_URL`, defa
 #### Maven
 ``./mvnw spring-boot:run  -Dspring-boot.run.arguments="--AUTH0_CLIENT_ID=<client-id> --AUTH0_CLIENT_SECRET=<client-secret>"``
 
+#### Tests
+``./mvnw verify`` runs the test suite against a real PostgreSQL started by
+[Testcontainers](https://testcontainers.com/), so Docker must be running. No Auth0
+credentials or network access to Auth0 are needed.
+
 #### IntelliJ
 Go in IntelliJ add the environment variables and then run it.
 

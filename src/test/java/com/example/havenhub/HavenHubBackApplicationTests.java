@@ -1,10 +1,9 @@
 package com.example.havenhub;
 
+import com.example.havenhub.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class HavenHubBackApplicationTests {
+class HavenHubBackApplicationTests extends AbstractIntegrationTest {
 
 	@Test
 	void contextLoads() {
