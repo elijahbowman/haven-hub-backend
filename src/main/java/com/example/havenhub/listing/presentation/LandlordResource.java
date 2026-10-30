@@ -74,7 +74,7 @@ public class LandlordResource {
         if (!violations.isEmpty()) {
             String violationsJoined = violations.stream()
                     .map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
-                    .collect(Collectors.joining());
+                    .collect(Collectors.joining("; "));
 
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, violationsJoined);
             return ResponseEntity.of(problemDetail).build();

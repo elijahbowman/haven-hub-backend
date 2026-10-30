@@ -5,8 +5,12 @@ import com.example.havenhub.listing.application.dto.sub.ListingInfoDTO;
 import com.example.havenhub.listing.application.dto.sub.PictureDTO;
 import com.example.havenhub.listing.application.dto.vo.PriceVO;
 import com.example.havenhub.listing.domain.BookingCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -15,7 +19,8 @@ public class SaveListingDTO {
     @NotNull
     BookingCategory category;
 
-    @NotNull String location;
+    @NotBlank @Size(max = 256)
+    String location;
 
     @NotNull @Valid
     ListingInfoDTO infos;
@@ -27,7 +32,16 @@ public class SaveListingDTO {
     PriceVO price;
 
     @NotNull
-    List<PictureDTO> pictures;
+    @Size(min = 5, max = 20, message = "A listing needs between 5 and 20 pictures")
+    List<@NotNull @Valid PictureDTO> pictures;
+
+    // The shared GuestsVO allows 0 because search uses 0 for "any"; a listing
+    // must host at least one guest.
+    @JsonIgnore
+    @AssertTrue(message = "A listing must host at least 1 guest")
+    public boolean isHostingAtLeastOneGuest() {
+        return infos == null || infos.guests() == null || infos.guests().value() >= 1;
+    }
 
     public BookingCategory getCategory() {
         return category;

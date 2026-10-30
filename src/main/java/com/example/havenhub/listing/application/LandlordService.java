@@ -36,6 +36,9 @@ public class LandlordService {
         this.pictureService = pictureService;
     }
 
+    // One transaction: if saving the pictures or the Auth0 role update fails, the
+    // listing is rolled back instead of being left without a cover.
+    @Transactional
     public CreatedListingDTO create(SaveListingDTO saveListingDTO) {
         Listing newListing = listingMapper.saveListingDTOToListing(saveListingDTO);
 
