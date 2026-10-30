@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        A stay is a set of nights, not a pair of instants. start_date is the check-in
+        day and end_date the check-out day (exclusive): a stay of [Oct 10, Oct 12)
+        covers the nights of Oct 10 and Oct 11.
+
+        Existing rows hold the guest's local midnight serialized as UTC, e.g. Oct 10
+        in UTC+2 is stored as 2026-10-09T22:00Z. Adding 12 hours before taking the
+        UTC date recovers the calendar day the guest picked for any offset between
+        UTC-12 and UTC+12.
+    -->
+    <changeSet id="00000000000005-booking-dates" author="havenhub">
+        <sql>
+            ALTER TABLE booking
+                ALTER COLUMN start_date TYPE date
+                    USING ((start_date + interval '12 hours') AT TIME ZONE 'UTC')::date,
+                ALTER COLUMN end_date TYPE date
+                    USING ((end_date + interval '12 hours') AT TIME ZONE 'UTC')::date;
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE booking
+                    ALTER COLUMN start_date TYPE timestamp with time zone
+                        USING start_date::timestamp AT TIME ZONE 'UTC',
+                    ALTER COLUMN end_date TYPE timestamp with time zone
+                        USING end_date::timestamp AT TIME ZONE 'UTC';
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="00000000000005-btree-gist" author="havenhub">
+        <!-- Lets a GiST index combine "=" on the uuid column with "&&" on the date range. -->
+        <sql>CREATE EXTENSION IF NOT EXISTS btree_gist;</sql>
+        <rollback/>
+    </changeSet>
+
+    <!--
+        The database, not the application, guarantees that a listing is never booked
+        twice for the same night, regardless of how many app instances run. Ranges are
+        half-open ('[)'), so a stay ending on Oct 12 doesn't conflict with one starting
+        on Oct 12.
+    -->
+    <changeSet id="00000000000005-booking-constraints" author="havenhub">
+        <sql>
+            ALTER TABLE booking
+                ADD CONSTRAINT booking_dates_ordered CHECK (end_date > start_date);
+
+            ALTER TABLE booking
+                ADD CONSTRAINT booking_no_overlap
+                    EXCLUDE USING gist (fk_listing WITH =, daterange(start_date, end_date, '[)') WITH &amp;&amp;);
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE booking DROP CONSTRAINT booking_no_overlap;
+                ALTER TABLE booking DROP CONSTRAINT booking_dates_ordered;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

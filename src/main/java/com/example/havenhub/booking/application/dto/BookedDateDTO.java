@@ -2,10 +2,10 @@ package com.example.havenhub.booking.application.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 public record BookedDateDTO(
-        @NotNull OffsetDateTime startDate,
-        @NotNull OffsetDateTime endDate
+        @NotNull LocalDate startDate,
+        @NotNull LocalDate endDate
 ) {
 }

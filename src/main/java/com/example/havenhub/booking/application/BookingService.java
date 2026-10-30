@@ -17,6 +17,8 @@ import com.example.havenhub.user.application.dto.ReadUserDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -29,45 +31,83 @@ public class BookingService {
     private final BookingMapper bookingMapper;
     private final UserService userService;
     private final LandlordService landlordService;
+    private final Clock clock;
+
+    static final int MAX_NIGHTS = 365;
 
     public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper,
-                          UserService userService, LandlordService landlordService) {
+                          UserService userService, LandlordService landlordService, Clock clock) {
         this.bookingRepository = bookingRepository;
         this.bookingMapper = bookingMapper;
         this.userService = userService;
         this.landlordService = landlordService;
+        this.clock = clock;
     }
 
+    /**
+     * Books the nights [startDate, endDate) of a listing for the current user.
+     * Invalid requests return an error state; a clash with another booking throws
+     * {@link BookingConflictException}, or DataIntegrityViolationException when two
+     * requests race and the database's booking_no_overlap constraint rejects one.
+     */
     @Transactional
     public State<Void, String> create(NewBookingDTO newBookingDTO) {
-        Booking booking = bookingMapper.newBookingToBooking(newBookingDTO);
-
         Optional<ListingCreateBookingDTO> listingOpt = landlordService.getByListingPublicId(newBookingDTO.listingPublicId());
 
         if (listingOpt.isEmpty()) {
-            return State.<Void, String>builder().forError("Landlord public id not found");
+            return State.<Void, String>builder().forError("Listing not found");
+        }
+
+        ListingCreateBookingDTO listing = listingOpt.get();
+        ReadUserDTO connectedUser = userService.getAuthenticatedUserFromSecurityContext();
+        int travelers = newBookingDTO.numberOfTravelers() == null ? 1 : newBookingDTO.numberOfTravelers();
+
+        Optional<String> validationError = validateBooking(newBookingDTO, listing, connectedUser, travelers);
+        if (validationError.isPresent()) {
+            return State.<Void, String>builder().forError(validationError.get());
         }
 
         boolean alreadyBooked = bookingRepository.bookingExistsAtInterval(newBookingDTO.startDate(), newBookingDTO.endDate(), newBookingDTO.listingPublicId());
-
         if (alreadyBooked) {
-            return State.<Void, String>builder().forError("One booking already exists");
+            throw new BookingConflictException("These dates are no longer available");
         }
 
-        ListingCreateBookingDTO listingCreateBookingDTO = listingOpt.get();
-
-        booking.setFkListing(listingCreateBookingDTO.listingPublicId());
-
-        ReadUserDTO connectedUser = userService.getAuthenticatedUserFromSecurityContext();
+        Booking booking = bookingMapper.newBookingToBooking(newBookingDTO);
+        booking.setFkListing(listing.listingPublicId());
         booking.setFkTenant(connectedUser.publicId());
-        booking.setNumberOfTravelers(1);
+        booking.setNumberOfTravelers(travelers);
 
         long numberOfNights = ChronoUnit.DAYS.between(booking.getStartDate(), booking.getEndDate());
-        booking.setTotalPrice((int) (numberOfNights * listingCreateBookingDTO.price().value()));
+        booking.setTotalPrice(Math.toIntExact(numberOfNights * listing.price().value()));
 
-        bookingRepository.save(booking);
+        // Flush so a constraint violation surfaces here rather than at commit.
+        bookingRepository.saveAndFlush(booking);
 
         return State.<Void, String>builder().forSuccess();
+    }
+
+    private Optional<String> validateBooking(NewBookingDTO newBooking, ListingCreateBookingDTO listing,
+                                             ReadUserDTO tenant, int travelers) {
+        // Accept "yesterday" in UTC so guests west of UTC can still book their today.
+        LocalDate earliestCheckIn = LocalDate.now(clock).minusDays(1);
+
+        if (!newBooking.endDate().isAfter(newBooking.startDate())) {
+            return Optional.of("Check-out must be after check-in");
+        }
+        if (newBooking.startDate().isBefore(earliestCheckIn)) {
+            return Optional.of("Check-in can't be in the past");
+        }
+        if (ChronoUnit.DAYS.between(newBooking.startDate(), newBooking.endDate()) > MAX_NIGHTS) {
+            return Optional.of("A stay can't exceed " + MAX_NIGHTS + " nights");
+        }
+        // Listings created before capacity was validated may have 0 guests; skip the check for them.
+        if (listing.guests() > 0 && travelers > listing.guests()) {
+            return Optional.of("This listing hosts at most " + listing.guests() + " guests");
+        }
+        if (tenant.publicId().equals(listing.landlordPublicId())) {
+            return Optional.of("You can't book your own listing");
+        }
+        return Optional.empty();
     }
 
     @Transactional(readOnly = true)

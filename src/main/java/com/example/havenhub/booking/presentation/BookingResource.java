@@ -1,5 +1,6 @@
 package com.example.havenhub.booking.presentation;
 
+import com.example.havenhub.booking.application.BookingConflictException;
 import com.example.havenhub.booking.application.BookingService;
 import com.example.havenhub.booking.application.dto.BookedDateDTO;
 import com.example.havenhub.booking.application.dto.BookedListingDTO;
@@ -8,18 +9,23 @@ import com.example.havenhub.infrastructure.config.SecurityUtils;
 import com.example.havenhub.sharedkernel.service.State;
 import com.example.havenhub.sharedkernel.service.StatusNotification;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/booking")
 public class BookingResource {
+
+    // PostgreSQL SQLSTATE for exclusion_violation (booking_no_overlap).
+    private static final String EXCLUSION_VIOLATION = "23P01";
 
     private final BookingService bookingService;
 
@@ -65,5 +71,32 @@ public class BookingResource {
     @PreAuthorize("hasAnyRole('" + SecurityUtils.ROLE_LANDLORD + "')")
     public ResponseEntity<List<BookedListingDTO>> getBookedListingForLandlord() {
         return ResponseEntity.ok(bookingService.getBookedListingForLandlord());
+    }
+
+    @ExceptionHandler(BookingConflictException.class)
+    public ResponseEntity<ProblemDetail> handleBookingConflict(BookingConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage()));
+    }
+
+    // Two requests that pass the availability check at the same time: the database
+    // constraint rejects the second insert.
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        if (hasSqlState(exception, EXCLUSION_VIOLATION)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "These dates are no longer available"));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid booking"));
+    }
+
+    private static boolean hasSqlState(Throwable exception, String sqlState) {
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sqlException && sqlState.equals(sqlException.getSQLState())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

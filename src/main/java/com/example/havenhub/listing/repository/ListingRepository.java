@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,5 +55,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
             " ORDER BY listing.id ASC")
     Page<Listing> searchAvailable(Pageable pageable, String location,
                                   int bathrooms, int bedrooms, int guests, int beds,
-                                  OffsetDateTime startDate, OffsetDateTime endDate);
+                                  LocalDate startDate, LocalDate endDate);
 }

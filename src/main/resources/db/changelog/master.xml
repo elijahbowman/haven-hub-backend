@@ -14,5 +14,6 @@
     <include file="/db/changelog/00000000000002_listing.xml" relativeToChangelogFile="false"/>
     <include file="/db/changelog/00000000000003_booking.xml" relativeToChangelogFile="false"/>
     <include file="/db/changelog/00000000000004_modify_listing.xml" relativeToChangelogFile="false"/>
+    <include file="/db/changelog/00000000000005_booking_dates.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

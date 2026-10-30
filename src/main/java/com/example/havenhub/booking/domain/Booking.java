@@ -4,7 +4,7 @@ import com.example.havenhub.sharedkernel.domain.AbstractAuditingEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,10 +23,10 @@ public class Booking extends AbstractAuditingEntity<Long> {
     private UUID publicId;
 
     @Column(name = "start_date", nullable = false)
-    private OffsetDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private OffsetDateTime endDate;
+    private LocalDate endDate;
 
     @Column(name = "total_price", nullable = false)
     private int totalPrice;
@@ -57,19 +57,19 @@ public class Booking extends AbstractAuditingEntity<Long> {
         this.publicId = publicId;
     }
 
-    public OffsetDateTime getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(OffsetDateTime startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public OffsetDateTime getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(OffsetDateTime endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
