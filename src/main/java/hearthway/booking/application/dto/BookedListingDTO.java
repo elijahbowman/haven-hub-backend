@@ -1,6 +1,6 @@
 package hearthway.booking.application.dto;
 
-import hearthway.listing.application.dto.sub.PictureDTO;
+import hearthway.listing.application.dto.sub.DisplayPictureDTO;
 import hearthway.listing.application.dto.vo.PriceVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record BookedListingDTO(@Valid PictureDTO cover,
+public record BookedListingDTO(@Valid DisplayPictureDTO cover,
                                @NotEmpty String location,
                                @Valid BookedDateDTO dates,
                                @Valid PriceVO totalPrice,

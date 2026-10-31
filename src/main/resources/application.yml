@@ -19,6 +19,11 @@ spring:
     jpa:
       repositories:
         bootstrap-mode: deferred
+    web:
+      pageable:
+        # Public endpoints are paginated; cap the page size so ?size=100000 can't
+        # load every listing at once.
+        max-page-size: 50
   jpa:
     open-in-view: false
     hibernate:

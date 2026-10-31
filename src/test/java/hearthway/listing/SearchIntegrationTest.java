@@ -51,7 +51,28 @@ class SearchIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[?(@.publicId == '%s')]", freeFromCheckIn.getPublicId()).isNotEmpty());
     }
 
+    @Test
+    void returnsPictureIdsInsteadOfImageBytes() throws Exception {
+        createListing(createUser("landlord@test.dev"), 2);
+
+        search(1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].cover.publicId").isNotEmpty())
+                .andExpect(jsonPath("$.content[0].cover.file").doesNotExist());
+    }
+
+    @Test
+    void capsThePageSize() throws Exception {
+        search(1, 1000)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(50));
+    }
+
     private ResultActions search(int guests) throws Exception {
+        return search(guests, 10);
+    }
+
+    private ResultActions search(int guests, int pageSize) throws Exception {
         String body = """
                 {
                   "location": "FRA",
@@ -67,7 +88,7 @@ class SearchIntegrationTest extends AbstractIntegrationTest {
 
         return mockMvc.perform(post("/api/tenant-listing/search")
                 .param("page", "0")
-                .param("size", "10")
+                .param("size", String.valueOf(pageSize))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));

@@ -1,5 +1,6 @@
 package hearthway.listing.mapper;
 
+import hearthway.listing.application.dto.sub.DisplayPictureDTO;
 import hearthway.listing.application.dto.sub.PictureDTO;
 import hearthway.listing.domain.ListingPicture;
 import org.mapstruct.Mapper;
@@ -18,6 +19,7 @@ public interface ListingPictureMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "listing", ignore = true)
+    @Mapping(target = "publicId", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "cover", source = "isCover")
@@ -28,19 +30,22 @@ public interface ListingPictureMapper {
     @Mapping(target = "isCover", source = "cover")
     PictureDTO convertToPictureDTO(ListingPicture listingPicture);
 
+    @Mapping(target = "isCover", source = "cover")
+    DisplayPictureDTO toDisplayPicture(ListingPicture listingPicture);
+
     /**
      * Returns the picture flagged as cover. Some queries load every picture of a
      * listing, so the set can't be assumed to contain only the cover. Falls back to
      * the earliest saved picture (lowest id) for listings without a cover flag.
      */
     @Named("extract-cover")
-    default PictureDTO extractCover(Set<ListingPicture> pictures) {
+    default DisplayPictureDTO extractCover(Set<ListingPicture> pictures) {
         return pictures.stream()
                 .filter(ListingPicture::isCover)
                 .findFirst()
                 .or(() -> pictures.stream().min(Comparator.comparing(ListingPicture::getId,
                         Comparator.nullsLast(Comparator.naturalOrder()))))
-                .map(this::convertToPictureDTO)
+                .map(this::toDisplayPicture)
                 .orElseThrow();
     }
 

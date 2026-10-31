@@ -97,13 +97,17 @@ public abstract class AbstractIntegrationTest {
         Listing saved = listingRepository.saveAndFlush(listing);
 
         // Card queries expect a cover picture.
-        ListingPicture cover = new ListingPicture();
-        cover.setListing(saved);
-        cover.setFile(new byte[]{1, 2, 3});
-        cover.setFileContentType("image/png");
-        cover.setCover(true);
-        listingPictureRepository.saveAndFlush(cover);
+        createPicture(saved, new byte[]{1, 2, 3}, "image/png", true);
         return saved;
+    }
+
+    protected ListingPicture createPicture(Listing listing, byte[] file, String contentType, boolean cover) {
+        ListingPicture picture = new ListingPicture();
+        picture.setListing(listing);
+        picture.setFile(file);
+        picture.setFileContentType(contentType);
+        picture.setCover(cover);
+        return listingPictureRepository.saveAndFlush(picture);
     }
 
     protected Booking createBooking(User tenant, Listing listing, LocalDate checkIn, LocalDate checkOut) {

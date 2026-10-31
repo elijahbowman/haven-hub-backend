@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Pictures are now served by URL (/api/pictures/{public_id}) instead of being
+        embedded in JSON, so they need a public identifier like every other exposed
+        entity. Existing rows get a random UUID.
+    -->
+    <changeSet id="00000000000007-picture-public-id" author="hearthway">
+        <sql>
+            ALTER TABLE listing_picture ADD COLUMN public_id uuid NOT NULL DEFAULT gen_random_uuid();
+            ALTER TABLE listing_picture ADD CONSTRAINT ux_listing_picture_public_id UNIQUE (public_id);
+        </sql>
+        <rollback>
+            <sql>ALTER TABLE listing_picture DROP COLUMN public_id;</sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

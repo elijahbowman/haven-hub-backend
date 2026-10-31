@@ -2,9 +2,11 @@ package hearthway.listing.domain;
 
 import hearthway.sharedkernel.domain.AbstractAuditingEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "listing_picture")
@@ -15,6 +17,10 @@ public class ListingPicture extends AbstractAuditingEntity<Long> {
     @SequenceGenerator(name = "listingPictureSequenceGenerator", sequenceName = "listing_picture_generator", allocationSize = 1)
     @Column(name = "id")
     private Long id;
+
+    @UuidGenerator
+    @Column(name = "public_id", nullable = false, updatable = false)
+    private UUID publicId;
 
     @ManyToOne
     @JoinColumn(name = "listing_fk", referencedColumnName = "id")
@@ -37,6 +43,14 @@ public class ListingPicture extends AbstractAuditingEntity<Long> {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public UUID getPublicId() {
+        return publicId;
+    }
+
+    public void setPublicId(UUID publicId) {
+        this.publicId = publicId;
     }
 
     public Listing getListing() {

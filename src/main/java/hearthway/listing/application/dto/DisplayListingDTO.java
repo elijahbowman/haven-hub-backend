@@ -3,7 +3,7 @@ package hearthway.listing.application.dto;
 import hearthway.listing.application.dto.sub.DescriptionDTO;
 import hearthway.listing.application.dto.sub.LandlordListingDTO;
 import hearthway.listing.application.dto.sub.ListingInfoDTO;
-import hearthway.listing.application.dto.sub.PictureDTO;
+import hearthway.listing.application.dto.sub.DisplayPictureDTO;
 import hearthway.listing.application.dto.vo.PriceVO;
 import hearthway.listing.domain.BookingCategory;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class DisplayListingDTO {
 
     private DescriptionDTO description;
-    private List<PictureDTO> pictures;
+    private List<DisplayPictureDTO> pictures;
     private ListingInfoDTO infos;
     private PriceVO price;
     private BookingCategory category;
@@ -27,11 +27,11 @@ public class DisplayListingDTO {
         this.description = description;
     }
 
-    public List<PictureDTO> getPictures() {
+    public List<DisplayPictureDTO> getPictures() {
         return pictures;
     }
 
-    public void setPictures(List<PictureDTO> pictures) {
+    public void setPictures(List<DisplayPictureDTO> pictures) {
         this.pictures = pictures;
     }
 
