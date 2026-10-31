@@ -1,1 +1,1 @@
-create schema haven_hub;
+create schema hearthway;

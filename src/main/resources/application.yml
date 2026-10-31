@@ -2,14 +2,14 @@ logging:
   level:
     ROOT: INFO
     org.hibernate.SQL: DEBUG
-    com.example.havenhub: DEBUG
+    hearthway: DEBUG
 
 spring:
   profiles:
     # Used only when no profile is set; production sets SPRING_PROFILES_ACTIVE=prod.
     default: dev
   application:
-    name: haven-hub-back
+    name: hearthway-backend
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -25,11 +25,11 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        default_schema: haven_hub
+        default_schema: hearthway
   liquibase:
     contexts: dev
     change-log: classpath:db/changelog/master.xml
-    default-schema: haven_hub
+    default-schema: hearthway
     enabled: true
   #    drop-first: true
   servlet:

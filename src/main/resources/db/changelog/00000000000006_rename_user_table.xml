@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        The users table was named after the project's old name. Earlier changesets
+        are left as they are (editing an applied changeset changes its checksum),
+        and the table is renamed here. "user" itself is reserved in PostgreSQL.
+        Foreign keys follow the rename automatically.
+    -->
+    <changeSet id="00000000000006-rename-user-table" author="hearthway">
+        <renameTable oldTableName="haven_hub_user" newTableName="app_user"/>
+    </changeSet>
+</databaseChangeLog>

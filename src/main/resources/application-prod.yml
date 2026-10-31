@@ -2,7 +2,7 @@ logging:
   level:
     ROOT: info
     org.hibernate.SQL: INFO
-    com.example.havenhub: INFO
+    hearthway: INFO
 
 spring:
   datasource:
@@ -12,10 +12,10 @@ spring:
   jpa:
     properties:
       hibernate:
-        default_schema: haven_hub
+        default_schema: hearthway
   liquibase:
     contexts: prod
-    default-schema: haven_hub
+    default-schema: hearthway
 
 application:
   auth0:

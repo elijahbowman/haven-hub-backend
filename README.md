@@ -1,9 +1,9 @@
-# HavenHub backend
+# Hearthway backend
 
 <!-- TODO: replace TODO-USERNAME and TODO-BACKEND-REPO so the badge points at this repo -->
 [![CI](https://github.com/TODO-USERNAME/TODO-BACKEND-REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/TODO-USERNAME/TODO-BACKEND-REPO/actions/workflows/ci.yml)
 
-Spring Boot backend of HavenHub
+Spring Boot backend of Hearthway
 
 <!-- TODO: replace TODO-USERNAME and TODO-FRONTEND-REPO with the real frontend repo URL -->
 [Angular Frontend](https://github.com/TODO-USERNAME/TODO-FRONTEND-REPO)
@@ -53,7 +53,7 @@ Go in IntelliJ add the environment variables and then run it.
 
 This application was intentionally built as an decoupled, self-contained single-repository prototype to optimize for portfolio evaluation without introducing high cloud infrastructure costs or specialized cluster dependencies. However, a production-grade Homestay Brokerage engine operating at scale must survive high concurrency, maintain tight security boundaries, and remain cost-effective. 
 
-Below is an explicit engineering analysis of the current architectural shortcuts and the corresponding technical blueprint designed to graduate HavenHub to production readiness.
+Below is an explicit engineering analysis of the current architectural shortcuts and the corresponding technical blueprint designed to graduate Hearthway to production readiness.
 
 ### 1. Concurrency, Distributed Transactions & Booking Race Conditions
 * **The Shortcut:** The current booking confirmation engine inside `BookingService.java` relies on a synchronous "Check-Then-Act" pipeline (`bookingExistsAtInterval` validation followed by a standard `bookingRepository.save`). 
